@@ -9,11 +9,17 @@ import (
 	"github.com/patrostkowski/csi-driver-openzfs/pkg/openzfs"
 )
 
-func main() {
-	var cfg openzfs.Config
+var (
+	version = "dev"
+)
 
-	flag.StringVar(&cfg.Endpoint, "endpoint", "unix://tmp/csi.sock", "CSI endpoint")
-	flag.StringVar(&cfg.DriverName, "drivername", "hostpath.csi.k8s.io", "name of the driver")
+func main() {
+	cfg := openzfs.Config{
+		VendorVersion: version,
+	}
+
+	flag.StringVar(&cfg.Endpoint, "endpoint", "", "CSI endpoint")
+	flag.StringVar(&cfg.DriverName, "drivername", "openzfs.csi.k8s.io", "name of the driver")
 	flag.StringVar(&cfg.NodeID, "nodeid", "", "node id")
 
 	klog.InitFlags(nil)

@@ -1,0 +1,63 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: csi-openzfsplugin-controller
+  namespace: csi-driver-openzfs
+spec:
+  selector:
+    matchLabels:
+      app: csi-openzfsplugin-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: csi-openzfsplugin-controller
+    spec:
+      priorityClassName: system-cluster-critical
+      serviceAccountName: csi-openzfs-controller
+      containers:
+        - name: csi-openzfsplugin-controller
+          image: 192.168.0.142:5001/openzfsplugin:latest
+          imagePullPolicy: "Always"
+          args:
+            - "-drivername=openzfs.csi.k8s.io"
+            - "-v=5"
+            - "-endpoint=$(CSI_ENDPOINT)"
+            - "-nodeid=$(KUBE_NODE_NAME)"
+          env:
+            - name: CSI_ENDPOINT
+              value: unix://var/lib/csi/sockets/pluginproxy/csi.sock
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+        - name: csi-provisioner
+          image: "registry.k8s.io/sig-storage/csi-provisioner:v5.2.0"
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"   
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+        - name: csi-attacher
+          image: "registry.k8s.io/sig-storage/csi-attacher:v4.8.0"
+          args:
+            - "--csi-address=$(ADDRESS)"
+            - "--v=5"          
+          env:
+            - name: ADDRESS
+              value: /var/lib/csi/sockets/pluginproxy/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+      volumes:
+        - name: socket-dir
+          emptyDir: {}

@@ -1,0 +1,23 @@
+---
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: csi-openzfsplugin-node
+  namespace: csi-driver-openzfs
+spec:
+  selector:
+    matchLabels:
+      app: csi-openzfsplugin-node
+  template:
+    metadata:
+      labels:
+        app: csi-openzfsplugin-node
+    spec:
+      priorityClassName: system-cluster-critical
+      hostNetwork: true
+      containers:
+        - name: csi-node-driver-registrar
+          image: "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.8.0"
+        - name: csi-openzfsplugin-node
+          image: "192.168.0.142:5001/csi-driver-openzfs:latest"
+          imagePullPolicy: Always

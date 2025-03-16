@@ -2,18 +2,24 @@ package openzfs
 
 import (
 	"errors"
-	"time"
 
+	"github.com/container-storage-interface/spec/lib/go/csi"
 	"k8s.io/klog/v2"
 )
 
 type Config struct {
-	Endpoint   string
-	DriverName string
-	NodeID     string
+	Endpoint      string
+	DriverName    string
+	NodeID        string
+	VendorVersion string
 }
 
 type OpenZFS struct {
+	csi.UnimplementedIdentityServer
+	csi.UnimplementedControllerServer
+	csi.UnimplementedNodeServer
+	csi.UnimplementedGroupControllerServer
+	csi.UnimplementedSnapshotMetadataServer
 	config Config
 }
 
@@ -29,15 +35,18 @@ func NewOpenZFSDriver(cfg *Config) (*OpenZFS, error) {
 	if cfg.Endpoint == "" {
 		return nil, errors.New("no driver endpoint provided")
 	}
+
+	klog.Infof("Driver: %v ", cfg.DriverName)
+	klog.Infof("Version: %s", cfg.VendorVersion)
+
 	return &OpenZFS{config: *cfg}, nil
 }
 
 func (openzfs *OpenZFS) Run() error {
-	klog.Infof("Hello from %+v", openzfs)
+	s := NewNonBlockingGRPCServer()
 
-	for {
-		time.Sleep(time.Hour)
-	}
+	s.Start(openzfs.config.Endpoint, openzfs, openzfs, openzfs, openzfs, nil)
+	s.Wait()
 
-	return nil // Unreachable
+	return nil
 }
