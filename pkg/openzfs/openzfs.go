@@ -12,6 +12,7 @@ type Config struct {
 	DriverName    string
 	NodeID        string
 	VendorVersion string
+	Plugin        string
 }
 
 type OpenZFS struct {
@@ -34,6 +35,15 @@ func NewOpenZFSDriver(cfg *Config) (*OpenZFS, error) {
 
 	if cfg.Endpoint == "" {
 		return nil, errors.New("no driver endpoint provided")
+	}
+
+	switch cfg.Plugin {
+	case "controller":
+		break
+	case "node":
+		break
+	default:
+		return nil, errors.New("no plugin name provided")
 	}
 
 	klog.Infof("Driver: %v ", cfg.DriverName)
