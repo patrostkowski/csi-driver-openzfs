@@ -24,65 +24,66 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi"
 )
 
-func (openzfs *OpenZFS) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest) (resp *csi.CreateVolumeResponse, finalErr error) {
-	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
+type Controller struct {
+	csi.UnimplementedControllerServer
+	driver *OpenZFS
 }
 
-func (openzfs *OpenZFS) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequest) (*csi.DeleteVolumeResponse, error) {
-	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
+func NewController(openzfs *OpenZFS) csi.ControllerServer {
+	return &Controller{
+		driver: openzfs,
+	}
 }
 
-func (openzfs *OpenZFS) ControllerGetCapabilities(ctx context.Context, req *csi.ControllerGetCapabilitiesRequest) (*csi.ControllerGetCapabilitiesResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) ControllerGetCapabilities(ctx context.Context, req *csi.ControllerGetCapabilitiesRequest) (*csi.ControllerGetCapabilitiesResponse, error) {
+	var csc []*csi.ControllerServiceCapability
 	return &csi.ControllerGetCapabilitiesResponse{
-		Capabilities: openzfs.getControllerServiceCapabilities(),
+		Capabilities: csc,
 	}, nil
 }
 
-func (openzfs *OpenZFS) ValidateVolumeCapabilities(ctx context.Context, req *csi.ValidateVolumeCapabilitiesRequest) (*csi.ValidateVolumeCapabilitiesResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) ValidateVolumeCapabilities(ctx context.Context, req *csi.ValidateVolumeCapabilitiesRequest) (*csi.ValidateVolumeCapabilitiesResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }
 
-func (openzfs *OpenZFS) ControllerPublishVolume(ctx context.Context, req *csi.ControllerPublishVolumeRequest) (*csi.ControllerPublishVolumeResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) ControllerPublishVolume(ctx context.Context, req *csi.ControllerPublishVolumeRequest) (*csi.ControllerPublishVolumeResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }
 
-func (openzfs *OpenZFS) ControllerUnpublishVolume(ctx context.Context, req *csi.ControllerUnpublishVolumeRequest) (*csi.ControllerUnpublishVolumeResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) ControllerUnpublishVolume(ctx context.Context, req *csi.ControllerUnpublishVolumeRequest) (*csi.ControllerUnpublishVolumeResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }
 
-func (openzfs *OpenZFS) GetCapacity(ctx context.Context, req *csi.GetCapacityRequest) (*csi.GetCapacityResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) GetCapacity(ctx context.Context, req *csi.GetCapacityRequest) (*csi.GetCapacityResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }
 
-func (openzfs *OpenZFS) ListVolumes(ctx context.Context, req *csi.ListVolumesRequest) (*csi.ListVolumesResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) ListVolumes(ctx context.Context, req *csi.ListVolumesRequest) (*csi.ListVolumesResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }
 
-func (openzfs *OpenZFS) ControllerGetVolume(ctx context.Context, req *csi.ControllerGetVolumeRequest) (*csi.ControllerGetVolumeResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) CreateSnapshot(ctx context.Context, req *csi.CreateSnapshotRequest) (*csi.CreateSnapshotResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }
 
-func (openzfs *OpenZFS) ControllerModifyVolume(ctx context.Context, req *csi.ControllerModifyVolumeRequest) (*csi.ControllerModifyVolumeResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) DeleteSnapshot(ctx context.Context, req *csi.DeleteSnapshotRequest) (*csi.DeleteSnapshotResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }
 
-func (openzfs *OpenZFS) CreateSnapshot(ctx context.Context, req *csi.CreateSnapshotRequest) (*csi.CreateSnapshotResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) ListSnapshots(ctx context.Context, req *csi.ListSnapshotsRequest) (*csi.ListSnapshotsResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }
 
-func (openzfs *OpenZFS) DeleteSnapshot(ctx context.Context, req *csi.DeleteSnapshotRequest) (*csi.DeleteSnapshotResponse, error) {
+// This implements csi.ControllerServer
+func (ctrl *Controller) ControllerExpandVolume(ctx context.Context, req *csi.ControllerExpandVolumeRequest) (*csi.ControllerExpandVolumeResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
-}
-
-func (openzfs *OpenZFS) ListSnapshots(ctx context.Context, req *csi.ListSnapshotsRequest) (*csi.ListSnapshotsResponse, error) {
-	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
-}
-
-func (openzfs *OpenZFS) ControllerExpandVolume(ctx context.Context, req *csi.ControllerExpandVolumeRequest) (*csi.ControllerExpandVolumeResponse, error) {
-	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
-}
-
-func (openzfs *OpenZFS) getControllerServiceCapabilities() []*csi.ControllerServiceCapability {
-	var csc []*csi.ControllerServiceCapability
-	return csc
 }

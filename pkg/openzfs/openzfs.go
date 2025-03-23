@@ -16,12 +16,10 @@ type Config struct {
 }
 
 type OpenZFS struct {
-	csi.UnimplementedIdentityServer
-	csi.UnimplementedControllerServer
-	csi.UnimplementedNodeServer
-	csi.UnimplementedGroupControllerServer
-	csi.UnimplementedSnapshotMetadataServer
-	config Config
+	identity   csi.IdentityServer
+	controller csi.ControllerServer
+	node       csi.NodeServer
+	config     Config
 }
 
 func NewOpenZFSDriver(cfg *Config) (*OpenZFS, error) {
@@ -41,7 +39,7 @@ func NewOpenZFSDriver(cfg *Config) (*OpenZFS, error) {
 	case "controller":
 		break
 	case "node":
-		break
+		return nil, errors.New("node plugin not implemented")
 	default:
 		return nil, errors.New("no plugin name provided")
 	}
@@ -55,7 +53,7 @@ func NewOpenZFSDriver(cfg *Config) (*OpenZFS, error) {
 func (openzfs *OpenZFS) Run() error {
 	s := NewNonBlockingGRPCServer()
 
-	s.Start(openzfs.config.Endpoint, openzfs, openzfs, openzfs, openzfs, nil)
+	s.Start(openzfs.config.Endpoint, NewIdentity(openzfs), NewController(openzfs), nil, nil, nil)
 	s.Wait()
 
 	return nil

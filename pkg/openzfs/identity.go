@@ -24,28 +24,39 @@ import (
 	"k8s.io/klog/v2"
 )
 
-func (openzfs *OpenZFS) GetPluginInfo(ctx context.Context, req *csi.GetPluginInfoRequest) (*csi.GetPluginInfoResponse, error) {
+type Identity struct {
+	csi.UnimplementedIdentityServer
+	driver *OpenZFS
+}
+
+func NewIdentity(openzfs *OpenZFS) csi.IdentityServer {
+	return &Identity{
+		driver: openzfs,
+	}
+}
+
+func (identity *Identity) GetPluginInfo(ctx context.Context, req *csi.GetPluginInfoRequest) (*csi.GetPluginInfoResponse, error) {
 	klog.V(5).Infof("Using default GetPluginInfo")
 
-	if openzfs.config.DriverName == "" {
+	if identity.driver.config.DriverName == "" {
 		return nil, status.Error(codes.Unavailable, "Driver name not configured")
 	}
 
-	if openzfs.config.VendorVersion == "" {
+	if identity.driver.config.VendorVersion == "" {
 		return nil, status.Error(codes.Unavailable, "Driver is missing version")
 	}
 
 	return &csi.GetPluginInfoResponse{
-		Name:          openzfs.config.DriverName,
-		VendorVersion: openzfs.config.VendorVersion,
+		Name:          identity.driver.config.DriverName,
+		VendorVersion: identity.driver.config.VendorVersion,
 	}, nil
 }
 
-func (openzfs *OpenZFS) Probe(ctx context.Context, req *csi.ProbeRequest) (*csi.ProbeResponse, error) {
+func (identity *Identity) Probe(ctx context.Context, req *csi.ProbeRequest) (*csi.ProbeResponse, error) {
 	return &csi.ProbeResponse{}, nil
 }
 
-func (openzfs *OpenZFS) GetPluginCapabilities(ctx context.Context, req *csi.GetPluginCapabilitiesRequest) (*csi.GetPluginCapabilitiesResponse, error) {
+func (identity *Identity) GetPluginCapabilities(ctx context.Context, req *csi.GetPluginCapabilitiesRequest) (*csi.GetPluginCapabilitiesResponse, error) {
 	klog.V(5).Infof("Using default capabilities")
 	caps := []*csi.PluginCapability{
 		{
