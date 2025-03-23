@@ -35,6 +35,7 @@ func NewIdentity(openzfs *OpenZFS) csi.IdentityServer {
 	}
 }
 
+// This implements csi.IdentityServer
 func (identity *Identity) GetPluginInfo(ctx context.Context, req *csi.GetPluginInfoRequest) (*csi.GetPluginInfoResponse, error) {
 	klog.V(5).Infof("Using default GetPluginInfo")
 
@@ -52,10 +53,12 @@ func (identity *Identity) GetPluginInfo(ctx context.Context, req *csi.GetPluginI
 	}, nil
 }
 
+// This implements csi.IdentityServer
 func (identity *Identity) Probe(ctx context.Context, req *csi.ProbeRequest) (*csi.ProbeResponse, error) {
 	return &csi.ProbeResponse{}, nil
 }
 
+// This implements csi.IdentityServer
 func (identity *Identity) GetPluginCapabilities(ctx context.Context, req *csi.GetPluginCapabilitiesRequest) (*csi.GetPluginCapabilitiesResponse, error) {
 	klog.V(5).Infof("Using default capabilities")
 	caps := []*csi.PluginCapability{

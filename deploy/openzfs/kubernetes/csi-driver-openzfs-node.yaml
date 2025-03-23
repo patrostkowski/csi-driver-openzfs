@@ -16,8 +16,28 @@ spec:
       priorityClassName: system-cluster-critical
       hostNetwork: true
       containers:
-        - name: csi-node-driver-registrar
-          image: "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.8.0"
         - name: csi-openzfsplugin-node
-          image: "192.168.0.142:5001/csi-driver-openzfs:latest"
-          imagePullPolicy: Always
+          image: 192.168.0.142:5001/openzfsplugin:latest
+          imagePullPolicy: "Always"
+          args:
+            - "-drivername=openzfs.csi.k8s.io"
+            - "-v=5"
+            - "-endpoint=$(CSI_ENDPOINT)"
+            - "-nodeid=$(KUBE_NODE_NAME)"
+            - "-plugin=node"
+          env:
+            - name: CSI_ENDPOINT
+              value: unix://var/lib/csi/sockets/pluginproxy/csi.sock
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /var/lib/csi/sockets/pluginproxy/
+        # - name: csi-node-driver-registrar
+        #   image: "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.8.0"
+      volumes:
+        - name: socket-dir
+          emptyDir: {}

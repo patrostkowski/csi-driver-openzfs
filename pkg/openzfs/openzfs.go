@@ -35,26 +35,28 @@ func NewOpenZFSDriver(cfg *Config) (*OpenZFS, error) {
 		return nil, errors.New("no driver endpoint provided")
 	}
 
+	driver := &OpenZFS{config: *cfg}
+
 	switch cfg.Plugin {
 	case "controller":
-		break
+		driver.controller = NewController(driver)
 	case "node":
-		return nil, errors.New("node plugin not implemented")
+		driver.node = NewNode(driver)
 	default:
-		return nil, errors.New("no plugin name provided")
+		return nil, errors.New("invalid or missing plugin name")
 	}
 
-	klog.Infof("Driver: %v ", cfg.DriverName)
+	driver.identity = NewIdentity(driver)
+
+	klog.Infof("Driver: %v", cfg.DriverName)
 	klog.Infof("Version: %s", cfg.VendorVersion)
 
-	return &OpenZFS{config: *cfg}, nil
+	return driver, nil
 }
 
 func (openzfs *OpenZFS) Run() error {
 	s := NewNonBlockingGRPCServer()
-
-	s.Start(openzfs.config.Endpoint, NewIdentity(openzfs), NewController(openzfs), nil, nil, nil)
+	s.Start(openzfs.config.Endpoint, openzfs.identity, openzfs.controller, openzfs.node, nil, nil)
 	s.Wait()
-
 	return nil
 }
