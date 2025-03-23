@@ -44,6 +44,16 @@ func (ctrl *Controller) ControllerGetCapabilities(ctx context.Context, req *csi.
 }
 
 // This implements csi.ControllerServer
+func (ctrl *Controller) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest) (*csi.CreateVolumeResponse, error) {
+	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
+}
+
+// This implements csi.ControllerServer
+func (ctrl *Controller) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequest) (*csi.DeleteVolumeResponse, error) {
+	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
+}
+
+// This implements csi.ControllerServer
 func (ctrl *Controller) ValidateVolumeCapabilities(ctx context.Context, req *csi.ValidateVolumeCapabilitiesRequest) (*csi.ValidateVolumeCapabilitiesResponse, error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }

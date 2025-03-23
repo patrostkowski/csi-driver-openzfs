@@ -34,6 +34,11 @@ func (node *Node) NodeGetInfo(ctx context.Context, req *csi.NodeGetInfoRequest) 
 }
 
 // This implements csi.NodeServer
+func (node *Node) NodeGetVolumeStats(ctx context.Context, req *csi.NodeGetVolumeStatsRequest) (resp *csi.NodeGetVolumeStatsResponse, finalErr error) {
+	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
+}
+
+// This implements csi.NodeServer
 func (node *Node) NodeGetCapabilities(ctx context.Context, req *csi.NodeGetCapabilitiesRequest) (resp *csi.NodeGetCapabilitiesResponse, finalErr error) {
 	return nil, status.Errorf(codes.Aborted, "unsupported %+v", req)
 }
