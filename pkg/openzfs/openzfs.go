@@ -12,15 +12,14 @@ type Config struct {
 	DriverName    string
 	NodeID        string
 	VendorVersion string
+	Plugin        string
 }
 
 type OpenZFS struct {
-	csi.UnimplementedIdentityServer
-	csi.UnimplementedControllerServer
-	csi.UnimplementedNodeServer
-	csi.UnimplementedGroupControllerServer
-	csi.UnimplementedSnapshotMetadataServer
-	config Config
+	identity   csi.IdentityServer
+	controller csi.ControllerServer
+	node       csi.NodeServer
+	config     Config
 }
 
 func NewOpenZFSDriver(cfg *Config) (*OpenZFS, error) {
@@ -36,17 +35,28 @@ func NewOpenZFSDriver(cfg *Config) (*OpenZFS, error) {
 		return nil, errors.New("no driver endpoint provided")
 	}
 
-	klog.Infof("Driver: %v ", cfg.DriverName)
+	driver := &OpenZFS{config: *cfg}
+
+	switch cfg.Plugin {
+	case "controller":
+		driver.controller = NewController(driver)
+	case "node":
+		driver.node = NewNode(driver)
+	default:
+		return nil, errors.New("invalid or missing plugin name")
+	}
+
+	driver.identity = NewIdentity(driver)
+
+	klog.Infof("Driver: %v", cfg.DriverName)
 	klog.Infof("Version: %s", cfg.VendorVersion)
 
-	return &OpenZFS{config: *cfg}, nil
+	return driver, nil
 }
 
 func (openzfs *OpenZFS) Run() error {
 	s := NewNonBlockingGRPCServer()
-
-	s.Start(openzfs.config.Endpoint, openzfs, openzfs, openzfs, openzfs, nil)
+	s.Start(openzfs.config.Endpoint, openzfs.identity, openzfs.controller, openzfs.node, nil, nil)
 	s.Wait()
-
 	return nil
 }

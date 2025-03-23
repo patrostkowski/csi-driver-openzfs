@@ -21,6 +21,7 @@ func main() {
 	flag.StringVar(&cfg.Endpoint, "endpoint", "", "CSI endpoint")
 	flag.StringVar(&cfg.DriverName, "drivername", "openzfs.csi.k8s.io", "name of the driver")
 	flag.StringVar(&cfg.NodeID, "nodeid", "", "node id")
+	flag.StringVar(&cfg.Plugin, "plugin", "", "plugin type: controller or node")
 
 	klog.InitFlags(nil)
 	flag.Parse()
